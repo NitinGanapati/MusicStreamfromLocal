@@ -1,16 +1,18 @@
 import 'dart:async';
 // import 'package:on_audio_query/on_audio_query.dart';
 
+import 'package:musics/pages/Favourites.dart';
+
 import 'pages/Playlist.dart' as PlayList;
 import 'models/Songs.dart';
 // import 'services/audio_query_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'db_handler.dart' as db;
 
 import 'package:audioplayers/audioplayers.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-
 import 'services/storage_scan_services.dart' as Musics;
 
 void main() {
@@ -28,16 +30,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
       // home: const PlayList.Playlist(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+   MyHomePage({super.key, required this.title, this.dbHelper});
+  final db.DBHelper? dbHelper;
 
   final String title;
+
+
+
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -46,6 +52,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // late final _player = AudioPlayer();
   // final AudioQueryService _audioService = AudioQueryService();
+  late Future<List<Songs>> songsList;
   final AudioPlayer _handlers = AudioPlayer();
   List<Map<String,dynamic>> songs = [];
   @override
@@ -55,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // _setupAudioPlayer();
     // _testSongsFromMap();
     init();
+    loadData();
     // fetchSongs();
     print("initState called");
   }
@@ -70,6 +78,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
 
     });
+  }
+  void loadData()async{
+      songsList = db.DBHelper().getMusicsList();
   }
   // void _testSongsFromMap() {
   //   final testMap = {
@@ -100,6 +111,12 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Nitin Music Player'),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Favourites()));
+
+          }, icon: const Icon(Icons.favorite),tooltip: 'favourites',)
+        ],
       ),
       body:
         songs.isEmpty ? Center(child: Text("Scanning your Songs"),)
@@ -107,15 +124,25 @@ class _MyHomePageState extends State<MyHomePage> {
         itemBuilder: (BuildContext context,int index){
               var singlesong = songs[index];
               print(singlesong);
-              return ListTile(
-                leading: Icon(Icons.music_note),
-                title: Text(singlesong["title"] ?? "Unknown"),
-                trailing: Text(singlesong["artistName"] ?? "Unknown"),
-                onTap: ()=>{
-                  playButton(singlesong["path"]!)
-                },
+              return
+                  ListTile(
+                    leading: Icon(Icons.music_note),
+                    title: Text(singlesong["title"] ?? "Unknown"),
+                    subtitle: Text(singlesong["artistName"] ?? "Unknown"),
+                    trailing: ElevatedButton(onPressed: (){
 
-              );
+                      Songs song = Songs(
+                        title : singlesong["title"],
+                        path: singlesong["path"],
+                        artistName: singlesong["artistName"],
+                        albumName: singlesong["albumName"]
+                      );
+                      db.DBHelper().insert(song).then( (value) {print("Songs inserted successfully");});
+                    }, child: Icon(Icons.add)),
+                    onTap: ()=>{
+                      playButton(singlesong["path"]!)
+                    },
+                  );
         })
       // SafeArea(
       //     child: Center(
@@ -243,6 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _handlers.play(DeviceFileSource(path));
 
         print("playing the songs");
+
     }
 
   Future<bool> requestPermission() async {
