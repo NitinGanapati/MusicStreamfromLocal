@@ -2,6 +2,7 @@ import 'dart:async';
 // import 'package:on_audio_query/on_audio_query.dart';
 
 import 'package:musics/pages/Favourites.dart';
+import 'package:musics/pages/PlayerScreen.dart' as Player;
 
 import 'pages/Playlist.dart' as PlayList;
 import 'models/Songs.dart';
@@ -50,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var singlesong;
   // late final _player = AudioPlayer();
   // final AudioQueryService _audioService = AudioQueryService();
   late Future<List<Songs>> songsList;
@@ -122,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         songs.isEmpty ? Center(child: Text("Scanning your Songs"),)
             : ListView.builder(itemCount: songs.length,
         itemBuilder: (BuildContext context,int index){
-              var singlesong = songs[index];
+              singlesong = songs[index];
               print(singlesong);
               return
                   ListTile(
@@ -140,7 +142,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       db.DBHelper().insert(song).then( (value) {print("Songs inserted successfully");});
                     }, child: Icon(Icons.add)),
                     onTap: ()=>{
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> Player.Playerscreen(
+                        path:singlesong["path"]
+                      ))),
                       playButton(singlesong["path"]!)
+
                     },
                   );
         })

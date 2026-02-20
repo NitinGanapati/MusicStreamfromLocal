@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:musics/db_handler.dart' as db;
 import 'package:musics/models/Songs.dart';
+import 'package:musics/pages/PlayerScreen.dart';
 class Favourites extends StatefulWidget {
   const Favourites({super.key});
 
@@ -44,12 +45,10 @@ class _FavouritesState extends State<Favourites> {
                   background: Container(
                     child: Icon(Icons.delete_forever),
                   ),
-                  onDismissed: (DismissDirection direction){
-                    setState(() async {
+                  onDismissed: (DismissDirection direction) async {
                       db.DBHelper().deleteMusic(snapshot.data![index].id!);
                       songs = await db.DBHelper().getMusicsList();
-                      snapshot.data!.remove(snapshot.data![index].id);
-                    });
+                      snapshot.data!.remove(snapshot.data!.removeAt(index));
                   },
                   key: ValueKey<int?>(snapshot.data![index].id),
                   child: Card(
@@ -59,6 +58,10 @@ class _FavouritesState extends State<Favourites> {
                       title: Text(snapshot.data![index].title.toString()),
                       subtitle: Text(snapshot.data![index].artistName.toString()),
                       trailing: Text(snapshot.data![index].albumName.toString()),
+                      onTap: (){
+                        print("Tap is called");
+
+                      },
                     ),
                   ),
                 );

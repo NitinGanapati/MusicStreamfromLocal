@@ -25,7 +25,7 @@ class DBHelper{
 
   _onCreate (Database db,int version)async{
     await db.execute(
-      "CREATE TABLE music(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,path TEXT NOT NULL,artistName TEXT NOT NULL,albumName TEXT NOT NULL)"
+      "CREATE TABLE music(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE,path TEXT NOT NULL,artistName TEXT NOT NULL,albumName TEXT NOT NULL)"
     );
   }
 
@@ -39,20 +39,18 @@ class DBHelper{
     var dbClient = await db;
     final List<Map<String, Object?>> queryResult = await dbClient!.query('music');
     print(queryResult);
-    print("FUNCTION CALLED");
-    print(queryResult);
+    // print("FUNCTION CALLED");
+    // print(queryResult);
 
     return queryResult.map((e) => Songs.fromMap(e)).toList();
   }
 
   Future<int?> deleteMusic(int id) async{
     var dbClient = await db;
-    return await dbClient?.delete(
-      'notes',
+    return await dbClient!.delete(
+      'music',
       where: 'id = ?',
       whereArgs: [id]
     );
-
-
   }
 }
