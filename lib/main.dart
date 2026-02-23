@@ -51,7 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var singlesong;
+
   // late final _player = AudioPlayer();
   // final AudioQueryService _audioService = AudioQueryService();
   late Future<List<Songs>> songsList;
@@ -124,7 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
         songs.isEmpty ? Center(child: Text("Scanning your Songs"),)
             : ListView.builder(itemCount: songs.length,
         itemBuilder: (BuildContext context,int index){
-              singlesong = songs[index];
+              final singlesong = songs[index];
+              // singlesong = songs[index];
               print(singlesong);
               return
                   ListTile(
@@ -145,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Navigator.push(context, MaterialPageRoute(builder: (context)=> Player.Playerscreen(
                         path:singlesong["path"]
                       ))),
-                      playButton(singlesong["path"]!)
+                      // playButton(singlesong["path"]!)
 
                     },
                   );

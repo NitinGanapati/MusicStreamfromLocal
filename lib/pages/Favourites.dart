@@ -60,7 +60,6 @@ class _FavouritesState extends State<Favourites> {
                       trailing: Text(snapshot.data![index].albumName.toString()),
                       onTap: (){
                         print("Tap is called");
-
                       },
                     ),
                   ),

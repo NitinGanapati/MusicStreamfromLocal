@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:musics/components/player_widget.dart';
 
 class Playerscreen extends StatefulWidget {
   final dynamic path;
@@ -48,13 +49,10 @@ class _PlayerScreenState extends State<Playerscreen> {
                 .of(context)
                 .colorScheme
                 .inversePrimary,
-            title: Text('Player')
+            title: Text('Nitin Player Window')
         ),
-        body: Column(
-          children: [
-            Text("Hi Namaste")
-          ],
-        )
+        body: playerWidget(player: player,path:widget.path)
+
     );
   }
 }
