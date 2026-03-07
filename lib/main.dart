@@ -151,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage>
                         }, icon: Icon(Icons.playlist_add))
                 ]
             ),
+            // stack is used to overload the widget
             body: Stack(
               children: [
                 songs.isEmpty ? RefreshIndicator(
