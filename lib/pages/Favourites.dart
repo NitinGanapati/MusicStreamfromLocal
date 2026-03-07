@@ -71,10 +71,13 @@ class _FavouritesState extends State<Favourites> {
                 return Center(child: Text("No favourites"));
               }
               return ListView.builder(itemCount:snapshot.data?.length,itemBuilder: (context,index){
+                print(index);
+                index = snapshot.data!.length-1-index;
                 return Dismissible(
                   direction: DismissDirection.horizontal,
                   background: Container(
                     child: Icon(Icons.delete_forever),
+                    color: Colors.red,
                   ),
                   onDismissed: (DismissDirection direction) async {
                       db.DBHelper().deleteMusic(snapshot.data![index].id!);
@@ -83,7 +86,9 @@ class _FavouritesState extends State<Favourites> {
                       // snapshot.data!.remove(snapshot.data!.removeAt(index));
                   },
                   key: ValueKey<int?>(snapshot.data![index].id),
+
                   child: Card(
+
                     child: ListTile(
 
                       contentPadding: EdgeInsets.all(0),

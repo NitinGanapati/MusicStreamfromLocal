@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+import 'package:musics/main.dart';
 import 'package:musics/models/Songs.dart';
 // import 'package:on_audio_query/on_audio_query.dart';
 
@@ -13,6 +14,8 @@ import 'package:musics/models/Songs.dart';
 class playerWidget extends StatefulWidget{
 
 
+
+  final Function(int) onSongChanged;
   final AudioPlayer player;
 
   // final dynamic path;
@@ -25,6 +28,7 @@ class playerWidget extends StatefulWidget{
     required this.player,
     // required this.path,
     required this.songs,
+    required this.onSongChanged,
     super.key
 });
 
@@ -38,6 +42,7 @@ class _playerWidgetState extends State<playerWidget>{
   PlayerState? _playerState;
   Duration? _duration;
   Duration? _position;
+
 
   double _volume = 1;
   double _rate = 1.0;
@@ -107,10 +112,10 @@ Uint8List? _artwork;
 
   @override void dispose() {
     // TODO: implement dispose
-    _durationSubscription?.cancel();
-    _positionSubscription?.cancel();
-    _playerCompleteSubscription?.cancel();
-    _playerStateChangeSubscription?.cancel();
+    // _durationSubscription?.cancel();
+    // _positionSubscription?.cancel();
+    // _playerCompleteSubscription?.cancel();
+    // _playerStateChangeSubscription?.cancel();
     super.dispose();
   }
 
@@ -119,10 +124,17 @@ Uint8List? _artwork;
     int currentIndex = widget.currentIndex;
     final color = Theme.of(context).primaryColor;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const SizedBox(height: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: 10),
+              // IconButton(
+              //   // icon: Icon(Icons.keyboard_arrow_down),
+              //   onPressed: (){
+              //     // Navigator.push(context,MaterialPageRoute(builder: (context)=> main()))
+              //   },
+              // ),
+              const SizedBox(height: 10),
               Text(
                 widget.songs[currentIndex]["title"] ?? "Unknown",
                 textAlign: TextAlign.center,
@@ -133,97 +145,100 @@ Uint8List? _artwork;
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            // child: Container(
-            //   padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-            //     child: Text(widget.songs[currentIndex]["title"] ?? "Unknown",textAlign: TextAlign.center,),
-            // ),
-          const SizedBox(height: 50),
-          Card(
-            // child: RoundedRectangleBorder(),
-            // elevation: 6,
-            // shape: RoundedRectangleBorder(
-            //   borderRadius: BorderRadius.circular(10),
-            // ),
-            child: ClipRect(
-              child: Align(
-                child: _artwork!=null ? Image.memory(_artwork!,width: 200,height: 200,) :
-                Container(
-                  width: 200,
-                  height: 200,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.music_note, size: 70),
+              // child: Container(
+              //   padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+              //     child: Text(widget.songs[currentIndex]["title"] ?? "Unknown",textAlign: TextAlign.center,),
+              // ),
+              const SizedBox(height: 50),
+              Card(
+                // child: RoundedRectangleBorder(),
+                // elevation: 6,
+                // shape: RoundedRectangleBorder(
+                //   borderRadius: BorderRadius.circular(10),
+                // ),
+                child: ClipRect(
+                  child: Align(
+                    child: _artwork!=null ? Image.memory(_artwork!,width: 200,height: 200,) :
+                    Container(
+                      width: 200,
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.music_note, size: 70),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(onPressed: _onPreviousSong, icon: Icon(Icons.skip_previous)),
-              IconButton(onPressed: _isPlaying ? null: _play, icon: Icon(Icons.play_arrow)),
-              IconButton(onPressed: _isPlaying ? _pause : null, icon: Icon(Icons.pause)),
-              IconButton(onPressed: _isPlaying || _isPaused ? _stop : null, icon: Icon(Icons.stop)),
-              IconButton(onPressed: _onNextSong, icon: Icon(Icons.next_plan))
-            ]
-          ),
-          Slider(onChanged: (value){
-            final duration = _duration;
-            if(duration == null){
-              return;
-            }
-            final position = value * duration.inMilliseconds;
-            player.seek(Duration(milliseconds: position.round()));
-          }, value: (_position != null &&
-              _duration != null &&
-              _position!.inMilliseconds > 0 &&
-              _position!.inMilliseconds < _duration!.inMilliseconds)
-              ? _position!.inMilliseconds / _duration!.inMilliseconds
-              : 0.0,
-          ),
-          Text(
-            _position != null ? '$_positionText/$_durationText'
-                : _duration != null
-                ? _durationText : '',
-            style: const TextStyle(fontSize: 16.0),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(onPressed: _isPlaying || _isPaused ? _stop : null, icon: Icon(Icons.stop)),
+                    IconButton(onPressed: _onPreviousSong, icon: Icon(Icons.skip_previous)),
+                    IconButton(onPressed: _isPlaying ? _pause: _play, icon: _isPaused ? Icon(Icons.play_arrow) : Icon(Icons.pause)),
+                    // IconButton(onPressed: _isPlaying ? _pause : null, icon: Icon(Icons.pause)),
+
+                    IconButton(onPressed: _onNextSong, icon: Icon(Icons.next_plan))
+                  ]
+              ),
+              Slider(onChanged: (value){
+                final duration = _duration;
+                if(duration == null){
+                  return;
+                }
+                final position = value * duration.inMilliseconds;
+                player.seek(Duration(milliseconds: position.round()));
+              }, value: (_position != null &&
+                  _duration != null &&
+                  _position!.inMilliseconds > 0 &&
+                  _position!.inMilliseconds < _duration!.inMilliseconds)
+                  ? _position!.inMilliseconds / _duration!.inMilliseconds
+                  : 0.0,
+              ),
+              Text(
+                _position != null ? '$_positionText/$_durationText'
+                    : _duration != null
+                    ? _durationText : '',
+                style: const TextStyle(fontSize: 16.0),
+              ),
+
+              const Text(
+                "Volume",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              Slider(value: _volume,
+                  min: 0.0,
+                  max: 1.0,
+                  divisions: 10,
+                  label : (_volume*100).round().toString(),
+                  onChanged: (value)async{
+                    setState((){
+                      _volume = value;
+                    });
+                    await player.setVolume(_volume);
+                  }),
+              const Text(
+                "Speed",
+                style:TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              Slider(
+                value: _rate,
+                min: 0.0,
+                max: 2.0,
+                divisions: 4,
+                label: "${_rate.toStringAsFixed(1)}",
+                onChanged: (value) async{
+                  setState((){
+                    _rate = value;
+                  });
+
+                  await player.setPlaybackRate(_rate);
+                },
+              )
+            ],
           ),
 
-          const Text(
-            "Volume",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          Slider(value: _volume,
-              min: 0.0,
-              max: 1.0,
-              divisions: 10,
-              label : (_volume*100).round().toString(),
-              onChanged: (value)async{
-            setState((){
-              _volume = value;
-            });
-            await player.setVolume(_volume);
-          }),
-          const Text(
-            "Speed",
-            style:TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          Slider(
-            value: _rate,
-            min: 0.0,
-            max: 2.0,
-            divisions: 4,
-            label: "${_rate.toStringAsFixed(1)}",
-            onChanged: (value) async{
-
-              setState((){
-                _rate = value;
-              });
-
-            await player.setPlaybackRate(_rate);
-          },
-          )
-        ],
-      ),
     );
+
+
   }
 
   void _initStreams() {
@@ -258,6 +273,13 @@ Uint8List? _artwork;
     setState(() {
       _playerState = PlayerState.playing;
     });
+
+    // if(_isPlaying){
+    //   await player.stop();
+    //   setState((){
+    //     _playerState = PlayerState.stopped;
+    //   });
+    // }
   }
   Future<void> _pause() async{
     await player.pause();
@@ -285,8 +307,6 @@ Uint8List? _artwork;
     catch(e){
       print('Metadata Error : ${e}');
     }
-  
-
   }
 
 
@@ -305,27 +325,35 @@ Uint8List? _artwork;
 
     });
  }
- Future<void> _onNextSong()async {
-    if(widget.currentIndex < widget.songs.length -1){
-      setState((){
-        widget.currentIndex++;
-      });
-      await playCurrentSong();
+ // Future<void> _onNextSong()async {
+ //    if(widget.currentIndex < widget.songs.length -1){
+ //      setState((){
+ //        widget.onSongChanged(widget.currentIndex++);
+ //      });
+ //      await playCurrentSong();
+ //    }
+ //    else{
+ //      return;
+ //    }
+ // }
+  Future<void> _onNextSong() async {
+    if (widget.currentIndex < widget.songs.length - 1) {
+      int newIndex = widget.currentIndex + 1;
+      widget.onSongChanged(newIndex);
+      await player.stop();
+      await player.setSource(DeviceFileSource(widget.songs[newIndex]["path"]));
+      await player.resume();
+      await _loadMetadata(widget.songs[newIndex]["path"]);
     }
-    else{
-      return;
-    }
- }
+  }
 
  Future<void> _onPreviousSong() async{
-   if(widget.currentIndex > 0){
-     setState((){
-       widget.currentIndex--;
-     });
-     await playCurrentSong();
-   }
-   else{
-     return;
+   if(widget.currentIndex>0){
+     int newIndex = widget.currentIndex-1;
+     widget.onSongChanged(newIndex);
+     await player.setSource(DeviceFileSource(widget.songs[newIndex]["path"]));
+     await player.resume();
+     await _loadMetadata(widget.songs[newIndex]["path"]);
    }
  }
 

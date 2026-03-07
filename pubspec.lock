@@ -190,6 +190,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_media_delete:
+    dependency: "direct main"
+    description:
+      name: flutter_media_delete
+      sha256: f00a7da4978ad99365cd50532cd0627026081c1c9c5702fdf8478fa94aa9e926
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
